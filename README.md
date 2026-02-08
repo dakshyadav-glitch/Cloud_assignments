@@ -30,12 +30,12 @@ It serves a basic HTML form that collects a **username** and **password**, valid
 ---
 
 ## Project Structure
-
-├── [main.py](http://main.py/)          # FastAPI backend
-├── index.html       # Frontend registration form
-├── .env             # Environment variables (not committed)
-├── venv/            # Python virtual environment
-└── [README.md](http://readme.md/)
+ 
+main.py          # FastAPI backend
+index.html       # Frontend registration form
+.env             # Environment variables (not committed)
+venv/            # Python virtual environment
+README.md
 
 ---
 
