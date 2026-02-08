@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Registration</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #22b26a, #f6f7f6);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2e2e2e;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #dcdcdc;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 12px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3f9e45;
+    }
+
+    .message {
+      margin-top: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.error {
+      background: #fdecea;
+      color: #b3261e;
+    }
+
+    .message.success {
+      background: #edf7ed;
+      color: #1e7e34;
+    }
+
+    .note {
+      margin-top: 14px;
+      font-size: 12px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>User Registration</h2>
+
+  <form id="registerForm">
+    <label>Username</label>
+    <input type="text" name="username" required minlength="3">
+
+    <label>Password</label>
+    <input type="password" name="password" required minlength="6">
+
+    <button type="submit">Create Account</button>
+
+    <div id="formMessage" class="message"></div>
+  </form>
+
+  <div class="note">
+    Passwords are securely hashed before storage.
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("registerForm");
+  const messageBox = document.getElementById("formMessage");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    messageBox.style.display = "none";
+    messageBox.className = "message";
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/submit", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        messageBox.textContent = data.detail || "Something went wrong";
+        messageBox.classList.add("error");
+      } else {
+        messageBox.textContent = data.message;
+        messageBox.classList.add("success");
+        form.reset();
+      }
+
+    } catch (err) {
+      messageBox.textContent = "Server unreachable";
+      messageBox.classList.add("error");
+    }
+
+    messageBox.style.display = "block";
+  });
+</script>
+
+</body>
+</html>
