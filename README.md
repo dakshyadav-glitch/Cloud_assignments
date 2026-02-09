@@ -96,7 +96,7 @@ users/<username>.json
 8. Success or error message is returned to the frontend
 
 ### Image
-![Form] (screenshots/Form.png)
+![Form](screenshots/Form.png)
 
 ### API Endpoints
 
