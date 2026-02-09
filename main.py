@@ -10,6 +10,7 @@ START_TIME = time.time()
 
 def get_manual_metrics():
     with open('/proc/loadavg', 'r') as f:
+        # avg load for 0.01 sec
         cpu_load = float(f.read().split()[0])
 
     with open('/proc/meminfo', 'r') as f:
