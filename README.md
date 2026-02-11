@@ -1,160 +1,242 @@
-# 🚀 Cloud Run System Health Monitor (Flask)
+# Cloud Run System Health Analyzer
 
-A lightweight **Flask-based system health monitoring service** containerized with Docker and deployed on **Google Cloud Run**.
+A lightweight Flask-based monitoring service deployed on **Google Cloud Run** that exposes real-time system metrics using Linux `/proc` and cgroup data.
 
-The application exposes REST endpoints to verify service availability and analyze runtime system metrics such as CPU load, memory usage, uptime, and overall health score.
+This service calculates:
+
+- CPU load & process usage
+- Memory usage (host + container-level)
+- CPU throttling detection
+- Cold start detection
+- Dynamic health score
 
 ---
 
-## 📌 Objective
+## 🌍 Live URL
 
-To demonstrate hands-on proficiency in:
+```
+https://daksh-yadav1-224372059131.us-central1.run.app
+```
 
-- Linux & shell scripting fundamentals
-- Python Flask application development
-- Containerization using Docker
-- Serverless deployment using **Google Cloud Run**
-- Designing custom system health metrics and scoring logic
-    
-    ---
-    
+Health endpoint:
 
-## 🧱 Project Structure
-
-```jsx
-
-├── sys_check.sh          # Linux automation & system logging script
-├── deploy_app/
-│   ├── main.py           # Flask application (core logic)
-│   ├── requirements.txt  # Python dependencies
-│   └── Dockerfile        # Container configuration for Cloud Run
-└── README.md
-
+```
+GET /analyze
 ```
 
 ---
 
-## 🖥️ Application Overview
+# Project Overview
 
-### 🔹 Root Endpoint
+This application:
 
-**GET /**
+1. Reads system metrics directly from:
+    - `/proc/loadavg`
+    - `/proc/self/stat`
+    - `/proc/meminfo`
+    - `/sys/fs/cgroup/*`
+2. Computes:
+    - CPU usage estimation
+    - Memory pressure
+    - CPU throttling detection
+    - Cold start detection
+3. Generates a **dynamic health score (0–100)** based on resource usage.
 
-Returns a simple confirmation message indicating the service is running.
+---
 
-```jsx
-Hello from Cloud Run!! System check complete. You can now proceed with image.
-```
+# 📊 Sample JSON Output
 
-### 🔹 Analyze Endpoint
-
-**GET /analyze**
-
-Returns dynamic system health metrics from inside the running container.
-
-### Sample JSON Response
-
-```
+```json
 {
-  "timestamp": "2026-02-09T10:45:12.345Z",
-  "uptime_seconds": 123.45,
-  "cpu_metric": "Load: 0.87",
-  "memory_metric": "42.18%",
-  "health_score": 100,
-  "message": "Optimal: Resource usage is optimal",
-  "method": "Linux /proc manual parsing"
+  "cpu_metrics": {
+    "cpu_usage_percent_est": null,
+    "last_process_id": "0",
+    "load_1m": 0,
+    "load_5m": 0,
+    "process_cpu_seconds": 0.17,
+    "runnable_processes": "0/0",
+    "throttled_usec": 0,
+    "throttling_detected": false
+  },
+  "health": {
+    "cold_start": false,
+    "message": "Optimal: Resource usage is optimal",
+    "score": 97
+  },
+  "memory_metrics": {
+    "available_kb": 995368,
+    "container_limit_kb": 524288,
+    "container_used_kb": 53124,
+    "memory_pressure": false,
+    "process_rss_kb": 33856,
+    "total_kb": 1048576,
+    "used_kb": 53208,
+    "used_percent": 5.07
+  },
+  "note": "Basic system metrics using Linux /proc and cgroup",
+  "timestamp": "2026-02-11 16:39:53",
+  "uptime_seconds": 20.26
 }
 
 ```
 
 ---
 
-## ⚙️ Metrics & Logic
+# 📖 JSON Field Explanation
 
-- **CPU Metric**
-    - Parsed manually from `/proc/loadavg`
-- **Memory Metric**
-    - Calculated using `/proc/meminfo`
-- **Uptime**
-    - Measured from application start time
-- **Health Score (0–100)**
-    - −20 if memory usage > 80%
-    - −20 if CPU load > 2.0
-- **Health Status Message**
-    - `Optimal` → ≥ 90
-    - `Healthy` → 70–89
-    - `Warning` → < 70
+## CPU Metrics
 
-All logic is implemented **inside `main.py`**, as required.
+| Field | Description |
+| --- | --- |
+| `load_1m` | System load average over 1 minute |
+| `load_5m` | System load average over 5 minutes |
+| `runnable_processes` | Running processes vs total processes |
+| `process_cpu_seconds` | Total CPU time consumed by this process |
+| `cpu_usage_percent_est` | Estimated CPU % between requests |
+| `throttled_usec` | Time CPU was throttled (microseconds) |
+| `throttling_detected` | Boolean flag for CPU throttling |
 
 ---
 
-## 🐳 Containerization (Docker)
+## Memory Metrics
 
-Cloud Run requires applications to run inside a container.
-
-The provided `Dockerfile`:
-
-- Uses a lightweight Python base image
-- Installs dependencies from `requirements.txt`
-- Runs the app using **gunicorn** on port `8080`
+| Field | Description |
+| --- | --- |
+| `total_kb` | Total system memory |
+| `available_kb` | Free memory available |
+| `used_kb` | Used memory |
+| `used_percent` | Percentage memory used |
+| `process_rss_kb` | Memory used by this Flask process |
+| `container_used_kb` | Memory used by container |
+| `container_limit_kb` | Cloud Run memory limit |
+| `memory_pressure` | True if usage > 80% of container limit |
 
 ---
 
-## ☁️ Deployment to Google Cloud Run
+## Health Object
 
-### 1️⃣ Build the Docker Image
+| Field | Description |
+| --- | --- |
+| `score` | Calculated health score (0–100) |
+| `message` | Health status message |
+| `cold_start` | True if container started within last 10 seconds |
 
-```jsx
-gcloud builds submit --tag [gcr.io/PROJECT_ID/hello-cloud-run](http://gcr.io/PROJECT_ID/hello-cloud-run)
+---
+
+# Health Score Logic
+
+Initial Score: `100`
+
+Penalties applied:
+
+- Memory usage → `used_percent × 0.4`
+- CPU load → `load_1m × 10`
+- CPU throttling → `20`
+- Cold start → `10`
+
+Score ranges:
+
+| Score | Status |
+| --- | --- |
+| 81–100 | Optimal |
+| 61–80 | Healthy |
+| 51–60 | Warning |
+| ≤50 | Critical |
+
+---
+
+# 🖥 Run Locally
+
+## 1️⃣ Clone Repository
+
+```bash
+gitclone <your-repo-url>cd <repo-folder>
 ```
 
-### 2️⃣ Deploy to Cloud Run
+## 2️⃣ Create Virtual Environment
 
-```jsx
-gcloud run deploy hello-cloud-run \
-  --image gcr.io/PROJECT_ID/hello-cloud-run \
+```bash
+python3 -m venv venvsource venv/bin/activate
+```
+
+## 3️⃣ Install Dependencies
+
+Create `requirements.txt`:
+
+```
+flask
+```
+
+Then install:
+
+```bash
+pip install -r requirements.txt
+```
+
+## 4️⃣ Run Application
+
+```bash
+python app.py
+```
+
+Access locally:
+
+```
+http://localhost:8080/analyze
+```
+
+---
+
+# ☁️ Build & Deploy to Cloud Run
+
+## 1️⃣ Set Project
+
+```bash
+gcloud configset project YOUR_PROJECT_ID
+```
+
+---
+
+## 2️⃣ Build Container Using Cloud Build
+
+```bash
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/system-health-analyzer
+```
+
+---
+
+## 3️⃣ Deploy to Cloud Run
+
+```bash
+gcloud run deploy system-health-analyzer \
+  --image gcr.io/YOUR_PROJECT_ID/system-health-analyzer \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated
-
 ```
-
-After deployment, Cloud Run provides a **public service URL**.
 
 ---
 
-## 🧪 Local Development (Optional)
+# 🏗 Architecture Overview
 
-```jsx
-pip install -r requirements.txt
-python [main.py](http://main.py/)
+```
+Client → Cloud Run → Flask App
+                      ↓
+                /proc + cgroup
+                      ↓
+               JSON Health Output
 ```
 
-**Access locally:**
+---
 
-[`http://localhost:8080/`](http://localhost:8080/)
+# 🔎 Technical Highlights
 
-[`http://localhost:8080/analyze`](http://localhost:8080/analyze)
+- Direct Linux `/proc` parsing
+- cgroup v1 memory limit detection
+- CPU throttling detection
+- Cold start detection
+- Custom health scoring algorithm
+- IST timestamp handling
+- Cloud-native container deployment
 
-### **🧠 Key Learnings**
-Manual system metric extraction using Linux /proc
-
-Stateless service design for serverless environments
-
-Optimizing Flask apps for Cloud Run
-
-Designing meaningful health scoring logic
-
-End-to-end containerized deployment on GCP
-
-### 📎 Deliverables Checklist
-✅ sys_check.sh
-
-✅ `[main.py](http://main.py/)` with / and /analyze
-
-✅ `requirements.txt`
-
-✅ Dockerfile
-
-✅ Deployed Cloud Run Service URL
+---
