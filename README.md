@@ -12,7 +12,7 @@ This service calculates:
 
 ---
 
-## 🌍 Live URL
+## Live URL
 
 ```
 https://daksh-yadav1-224372059131.us-central1.run.app
@@ -44,7 +44,7 @@ This application:
 
 ---
 
-# 📊 Sample JSON Output
+# Sample JSON Output
 
 ```json
 {
@@ -82,7 +82,7 @@ This application:
 
 ---
 
-# 📖 JSON Field Explanation
+# JSON Field Explanation
 
 ## CPU Metrics
 
@@ -145,7 +145,7 @@ Score ranges:
 
 ---
 
-# 🖥 Run Locally
+# Run Locally
 
 ## 1️⃣ Clone Repository
 
@@ -187,7 +187,7 @@ http://localhost:8080/analyze
 
 ---
 
-# ☁️ Build & Deploy to Cloud Run
+# Build & Deploy to Cloud Run
 
 ## 1️⃣ Set Project
 
@@ -217,7 +217,7 @@ gcloud run deploy system-health-analyzer \
 
 ---
 
-# 🏗 Architecture Overview
+# Architecture Overview
 
 ```
 Client → Cloud Run → Flask App
@@ -229,7 +229,7 @@ Client → Cloud Run → Flask App
 
 ---
 
-# 🔎 Technical Highlights
+# Technical Highlights
 
 - Direct Linux `/proc` parsing
 - cgroup v1 memory limit detection
