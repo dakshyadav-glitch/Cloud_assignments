@@ -1,4 +1,4 @@
-# 🚀 Cloud Run System Health Monitor (Flask)
+# Cloud Run System Health Monitor (Flask)
 
 A lightweight **Flask-based system health monitoring service** containerized with Docker and deployed on **Google Cloud Run**.
 
@@ -6,7 +6,7 @@ The application exposes REST endpoints to verify service availability and analyz
 
 ---
 
-## 📌 Objective
+## Objective
 
 To demonstrate hands-on proficiency in:
 
@@ -19,7 +19,7 @@ To demonstrate hands-on proficiency in:
     ---
     
 
-## 🧱 Project Structure
+## Project Structure
 
 ```jsx
 
@@ -34,7 +34,7 @@ To demonstrate hands-on proficiency in:
 
 ---
 
-## 🖥️ Application Overview
+## Application Overview
 
 ### 🔹 Root Endpoint
 
@@ -69,7 +69,7 @@ Returns dynamic system health metrics from inside the running container.
 
 ---
 
-## ⚙️ Metrics & Logic
+## Metrics & Logic
 
 - **CPU Metric**
     - Parsed manually from `/proc/loadavg`
@@ -89,7 +89,7 @@ All logic is implemented **inside `main.py`**, as required.
 
 ---
 
-## 🐳 Containerization (Docker)
+## Containerization (Docker)
 
 Cloud Run requires applications to run inside a container.
 
@@ -101,7 +101,7 @@ The provided `Dockerfile`:
 
 ---
 
-## ☁️ Deployment to Google Cloud Run
+## Deployment to Google Cloud Run
 
 ### 1️⃣ Build the Docker Image
 
@@ -124,7 +124,7 @@ After deployment, Cloud Run provides a **public service URL**.
 
 ---
 
-## 🧪 Local Development (Optional)
+## Local Development (Optional)
 
 ```jsx
 pip install -r requirements.txt
@@ -137,7 +137,7 @@ python [main.py](http://main.py/)
 
 [`http://localhost:8080/analyze`](http://localhost:8080/analyze)
 
-### **🧠 Key Learnings**
+### **Key Learnings**
 Manual system metric extraction using Linux /proc
 
 Stateless service design for serverless environments
@@ -148,12 +148,12 @@ Designing meaningful health scoring logic
 
 End-to-end containerized deployment on GCP
 
-### 📎 Deliverables Checklist
-✅ sys_check.sh
+### Deliverables Checklist
+sys_check.sh
 
-✅ `[main.py](http://main.py/)` with / and /analyze
+`[main.py](http://main.py/)` with / and /analyze
 
-✅ `requirements.txt`
+`requirements.txt`
 
 ✅ Dockerfile
 
